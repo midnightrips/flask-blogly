@@ -1,7 +1,7 @@
 from unittest import TestCase
 from app import app
 from flask import session
-from models import db, User
+from models import db, User, Post
 
 class FlaskTests(TestCase):
     def setUp(self):
@@ -11,7 +11,6 @@ class FlaskTests(TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.create_all()
-
 
     def tearDown(self):
         """Clean up after each test."""
@@ -69,7 +68,18 @@ class FlaskTests(TestCase):
                 'last-name': 'Doe',
                 'image': 'http://example.com/image.jpg'
             })
-            res = client.get('/users/1/delete')
+            res = client.post('/users/1/delete')
             self.assertEqual(res.status_code, 302)
             self.assertEqual(User.query.get(1), None)
+
+    def test_show_post_form(self):
+        """Test accessing the form to add a new post."""
+        with self.client as client:
+            res = client.post('/users/new', data={
+                'first-name': 'John',
+                'last-name': 'Doe',
+                'image': 'http://example.com/image.jpg'
+            })
+            res = self.client.get(f'/users/1/posts/new')
+            self.assertEqual(res.status_code, 200)
     
